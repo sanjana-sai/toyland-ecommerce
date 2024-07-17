@@ -1,0 +1,53 @@
+
+authentication
+schema:User
+
+attributes:[username,password,email]
+
+1) api for creating a user account(register)
+
+   url:http://127.0.0.1:8000/
+
+   method=post
+
+   body={
+        username,
+        password,
+        email
+   }
+ 
+
+2)api for fetching token
+
+    url: http://127.0.0.1:8000/api/token/
+
+    method:POST
+
+    body:{username,password}
+
+    authentication:Nill
+
+
+
+class BasketItemViewSet(ModelViewSet):
+
+    serializer_class=BasketItemSerializers
+    
+    queryset=BasketItems.objects.all()
+
+    authentication_classes=[authentication.TokenAuthentication]
+
+    permission_classes=[permissions.IsAuthenticated]
+    
+    def list(self,request,*args,**kwargs):       # to get a specific user_object expenses  , modelviewset list will give all the list so we create method
+
+        qs=BasketItems.objects.filter(user_object=request.user)
+
+        serializer_instance=BasketItemSerializers(qs,many=True)
+
+        return Response(data=serializer_instance.data)
+    
+    def perform_create(self,serializer):
+
+        return serializer.save(user_object=self.request.user)
+
